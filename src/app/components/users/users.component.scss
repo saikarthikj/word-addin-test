@@ -1,0 +1,32 @@
+table {
+    width: 100%;
+    border-spacing: 0;
+    .row{
+        cursor: pointer;
+        &:hover, &.active {
+            background-color: #dfdfff;
+        }
+    }
+    td, th {
+        padding: 5px;
+        border-bottom: 1px solid #ccc;
+    }
+}
+
+.error {
+  padding: 5px;
+  width: 250px;
+  color: white;
+  background-color: red;
+}
+
+.success {
+  padding: 5px;
+  width: 250px;
+  color: white;
+  background-color: green;
+}
+
+.validation-btn{
+  margin-top: 10px;
+}

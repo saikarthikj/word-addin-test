@@ -1,0 +1,20 @@
+<table>
+  <tr>
+    <th>First Name</th>
+    <th>Last Name</th>
+  </tr>
+  <tr *ngFor="let user of users" class="row" [class.active]="selected && selected.id === user.id" (click)="onRowSelect(user)">
+    <td>{{user.first_name}}</td>
+    <td>{{user.last_name}}</td>
+  </tr>
+</table>
+
+<button class="validation-btn" (click)="checkData()" mat-stroked-button color="primary" mat-button>Validation</button>
+
+<p *ngFor="let error of errors" class="error">
+  {{ error }}
+</p>
+
+<p *ngFor="let message of success" class="success">
+  {{ message }}
+</p>
