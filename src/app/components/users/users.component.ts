@@ -10,7 +10,7 @@ export class UsersComponent implements OnInit {
   users = [];
   errors = [];
   success = [];
-  dataModified = {
+  dataModified: any = {
     picture: null,
     firstName: null,
     lastName: null,
@@ -29,6 +29,7 @@ export class UsersComponent implements OnInit {
     this.selected = user;
     this.errors = [];
     this.success = [];
+    this.dataModified = {};
     this.helperService.insertData(user);
   }
 

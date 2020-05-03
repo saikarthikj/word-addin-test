@@ -13,7 +13,11 @@ export class HelperService {
 
   set appToken(token) {
     this.token = token;
-    localStorage.setItem('appToken', token);
+    if ( this.token ) {
+      localStorage.setItem('appToken', token);
+    } else {
+      localStorage.removeItem('appToken'); 
+    }
   }
 
   get appToken() {
@@ -21,7 +25,7 @@ export class HelperService {
       return this.token;
     } else if (localStorage.getItem('appToken')) {
       this.token = localStorage.getItem('appToken');
-      return this.appToken;
+      return this.token;
     } else {
       return null;
     }

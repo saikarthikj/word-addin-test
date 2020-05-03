@@ -25,7 +25,7 @@ export class LoginComponent implements OnInit {
       this.helperService.login(this.form.value).subscribe( (res: { token: string}) => {
         if (res.token) {
           this.helperService.appToken = res.token;
-          this.router.navigate(['/users']);
+          this.router.navigate(['layout/users']);
         }
       }, (res: any) => {
         if (res.error) {
