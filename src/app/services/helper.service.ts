@@ -9,6 +9,7 @@ export class HelperService {
   private token = null;
   context = null;
   insertedData = null;
+  paragraphsRange = [];
   constructor(private http: HttpClient) { }
 
   set appToken(token) {
@@ -59,37 +60,39 @@ export class HelperService {
         this.insertedData.load();
         this.insertedData.paragraphs.load();
         this.insertedData.inlinePictures.load();
-        await context.sync().then(async () => {
-          for (const item of this.insertedData.inlinePictures.items) {
-            item.delete();
-          }
-          for (const item of this.insertedData.paragraphs.items) {
-            item.delete();
-          }
-          await context.sync().then(() => {
-            documentLocation = this.insertedData;
-            this.insertUserData(context, documentLocation, data);
-          });
-        });
-      } else {
-        this.insertUserData(context, documentLocation, data);
+        await context.sync();
+        for (const item of this.insertedData.inlinePictures.items) {
+          item.delete();
+        }
+        for (const item of this.paragraphsRange) {
+          item.delete();
+        }
+        await context.sync();
+        documentLocation = this.insertedData;
       }
+      this.paragraphsRange = [];
+      const htmlString = `<img src="${data.avatar}" alt="User Pic">
+      <p>First Name: ${data.first_name}</p>
+      <p>Last Name: ${data.last_name}</p>
+      <p>Email: ${data.email}</p>
+      `;
+      this.insertedData = documentLocation.insertHtml(
+        htmlString,
+        Word.InsertLocation.after
+      );
+      this.insertedData.select('End');
+      this.insertedData.paragraphs.load();
+      context.trackedObjects.add(this.insertedData);
+      await context.sync();
+      for (const item of this.insertedData.paragraphs.items) {
+        item.load();
+      }
+      await context.sync();
+      for (const item of this.insertedData.paragraphs.items) {
+        this.paragraphsRange.push(item.getRange());
+      }
+      await context.sync();
     });
-  }
-
-  async insertUserData(context, documentLocation, data){
-    const htmlString = `<img src="${data.avatar}" alt="User Pic">
-    <p>First Name: ${data.first_name}</p>
-    <p>Last Name: ${data.last_name}</p>
-    <p>Email: ${data.email}</p>
-    `;
-    this.insertedData = documentLocation.insertHtml(
-      htmlString,
-      Word.InsertLocation.after
-    );
-    this.insertedData.select('End');
-    context.trackedObjects.add(this.insertedData);
-    await context.sync();
   }
 
   checkContent(data) {
@@ -99,29 +102,26 @@ export class HelperService {
           this.insertedData.load();
           this.insertedData.paragraphs.load();
           this.insertedData.inlinePictures.load();
-          await context.sync().then( async () => {
-            const paragraphs = this.insertedData.paragraphs.items;
-            for (const item of this.insertedData.inlinePictures.items) {
-              item.load();
-            }
-            for (const item of paragraphs) {
-              item.load();
-            }
-            await context.sync().then(() => {
-              const isFirstNameModified = paragraphs.find( item => this.checkData(item.text, data.first_name));
-              const isLastNameModified = paragraphs.find( item =>this.checkData(item.text, data.last_name));
-              const isEamilModified = paragraphs.find( item =>this.checkData(item.text, data.email));
-              const result = {
-                isPictureModified: this.insertedData.inlinePictures.items.length ? false : true,
-                isFirstNameModified: isFirstNameModified ? false : true,
-                isLastNameModified: isLastNameModified ? false : true,
-                isEamilModified: isEamilModified ? false : true
-              };
-              resolve(result);
-            });
-          });
-        } else {
-          resolve({});
+          context.document.body.paragraphs.load();
+          await context.sync();
+          const paragraphs = this.insertedData.paragraphs.items;
+          for (const item of this.insertedData.inlinePictures.items) {
+            item.load();
+          }
+          for (const item of this.paragraphsRange) {
+            item.load();
+          }
+          await context.sync();
+          const isFirstNameModified = paragraphs.find( item => this.checkData(item.text, data.first_name));
+          const isLastNameModified = paragraphs.find( item =>this.checkData(item.text, data.last_name));
+          const isEamilModified = paragraphs.find( item =>this.checkData(item.text, data.email));
+          const result = {
+            isPictureModified: this.insertedData.inlinePictures.items.length ? false : true,
+            isFirstNameModified: isFirstNameModified ? false : true,
+            isLastNameModified: isLastNameModified ? false : true,
+            isEamilModified: isEamilModified ? false : true
+          };
+          resolve(result);
         }
       });
     });
