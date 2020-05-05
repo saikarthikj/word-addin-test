@@ -59,29 +59,37 @@ export class HelperService {
         this.insertedData.load();
         this.insertedData.paragraphs.load();
         this.insertedData.inlinePictures.load();
-        await context.sync();
-        for (const item of this.insertedData.inlinePictures.items) {
-          item.delete();
-        }
-        for (const item of this.insertedData.paragraphs.items) {
-          item.delete();
-        }
-        await context.sync();
-        documentLocation = this.insertedData;
+        await context.sync(async () => {
+          for (const item of this.insertedData.inlinePictures.items) {
+            item.delete();
+          }
+          for (const item of this.insertedData.paragraphs.items) {
+            item.delete();
+          }
+          await context.sync(() => {
+            documentLocation = this.insertedData;
+            this.insertUserData(context, documentLocation, data);
+          });
+        });
+      } else {
+        this.insertUserData(context, documentLocation, data);
       }
-      const htmlString = `<img src="${data.avatar}" alt="User Pic">
-      <p>First Name: ${data.first_name}</p>
-      <p>Last Name: ${data.last_name}</p>
-      <p>Email: ${data.email}</p>
-      `;
-      this.insertedData = documentLocation.insertHtml(
-        htmlString,
-        Word.InsertLocation.after
-      );
-      this.insertedData.select('End');
-      context.trackedObjects.add(this.insertedData);
-      await context.sync();
     });
+  }
+
+  async insertUserData(context, documentLocation, data){
+    const htmlString = `<img src="${data.avatar}" alt="User Pic">
+    <p>First Name: ${data.first_name}</p>
+    <p>Last Name: ${data.last_name}</p>
+    <p>Email: ${data.email}</p>
+    `;
+    this.insertedData = documentLocation.insertHtml(
+      htmlString,
+      Word.InsertLocation.after
+    );
+    this.insertedData.select('End');
+    context.trackedObjects.add(this.insertedData);
+    await context.sync();
   }
 
   checkContent(data) {
@@ -91,25 +99,29 @@ export class HelperService {
           this.insertedData.load();
           this.insertedData.paragraphs.load();
           this.insertedData.inlinePictures.load();
-          await context.sync();
-          const paragraphs = this.insertedData.paragraphs.items;
-          for (const item of this.insertedData.inlinePictures.items) {
-            item.load();
-          }
-          for (const item of paragraphs) {
-            item.load();
-          }
-          await context.sync();
-          const isFirstNameModified = paragraphs.find( item => this.checkData(item.text, data.first_name));
-          const isLastNameModified = paragraphs.find( item =>this.checkData(item.text, data.last_name));
-          const isEamilModified = paragraphs.find( item =>this.checkData(item.text, data.email));
-          const result = {
-            isPictureModified: this.insertedData.inlinePictures.items.length ? false : true,
-            isFirstNameModified: isFirstNameModified ? false : true,
-            isLastNameModified: isLastNameModified ? false : true,
-            isEamilModified: isEamilModified ? false : true
-          };
-          resolve(result);
+          await context.sync( async () => {
+            const paragraphs = this.insertedData.paragraphs.items;
+            for (const item of this.insertedData.inlinePictures.items) {
+              item.load();
+            }
+            for (const item of paragraphs) {
+              item.load();
+            }
+            await context.sync(() => {
+              const isFirstNameModified = paragraphs.find( item => this.checkData(item.text, data.first_name));
+              const isLastNameModified = paragraphs.find( item =>this.checkData(item.text, data.last_name));
+              const isEamilModified = paragraphs.find( item =>this.checkData(item.text, data.email));
+              const result = {
+                isPictureModified: this.insertedData.inlinePictures.items.length ? false : true,
+                isFirstNameModified: isFirstNameModified ? false : true,
+                isLastNameModified: isLastNameModified ? false : true,
+                isEamilModified: isEamilModified ? false : true
+              };
+              resolve(result);
+            });
+          });
+        } else {
+          resolve({});
         }
       });
     });
