@@ -59,14 +59,14 @@ export class HelperService {
         this.insertedData.load();
         this.insertedData.paragraphs.load();
         this.insertedData.inlinePictures.load();
-        await context.sync(async () => {
+        await context.sync().then(async () => {
           for (const item of this.insertedData.inlinePictures.items) {
             item.delete();
           }
           for (const item of this.insertedData.paragraphs.items) {
             item.delete();
           }
-          await context.sync(() => {
+          await context.sync().then(() => {
             documentLocation = this.insertedData;
             this.insertUserData(context, documentLocation, data);
           });
@@ -99,7 +99,7 @@ export class HelperService {
           this.insertedData.load();
           this.insertedData.paragraphs.load();
           this.insertedData.inlinePictures.load();
-          await context.sync( async () => {
+          await context.sync().then( async () => {
             const paragraphs = this.insertedData.paragraphs.items;
             for (const item of this.insertedData.inlinePictures.items) {
               item.load();
@@ -107,7 +107,7 @@ export class HelperService {
             for (const item of paragraphs) {
               item.load();
             }
-            await context.sync(() => {
+            await context.sync().then(() => {
               const isFirstNameModified = paragraphs.find( item => this.checkData(item.text, data.first_name));
               const isLastNameModified = paragraphs.find( item =>this.checkData(item.text, data.last_name));
               const isEamilModified = paragraphs.find( item =>this.checkData(item.text, data.email));
