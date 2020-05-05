@@ -59,20 +59,12 @@ export class HelperService {
         this.insertedData.load();
         this.insertedData.paragraphs.load();
         this.insertedData.inlinePictures.load();
-        context.document.body.paragraphs.load()
         await context.sync();
         for (const item of this.insertedData.inlinePictures.items) {
           item.delete();
         }
-        for (const item of context.document.body.paragraphs.items) {
-          item.load();
-        }
-        await context.sync();
-        for (const item of context.document.body.paragraphs.items) {
-          const validate = ['First Name: ', 'Last Name: ', 'Email: '];
-          if(validate.find(i => item.text.indexOf(i)>=0)) {
-            item.delete();
-          }
+        for (const item of this.insertedData.paragraphs.items) {
+          item.delete();
         }
         await context.sync();
         documentLocation = this.insertedData;
@@ -87,7 +79,6 @@ export class HelperService {
         Word.InsertLocation.after
       );
       this.insertedData.select('End');
-      
       context.trackedObjects.add(this.insertedData);
       await context.sync();
     });
@@ -100,13 +91,12 @@ export class HelperService {
           this.insertedData.load();
           this.insertedData.paragraphs.load();
           this.insertedData.inlinePictures.load();
-          context.document.body.paragraphs.load();
           await context.sync();
           const paragraphs = this.insertedData.paragraphs.items;
           for (const item of this.insertedData.inlinePictures.items) {
             item.load();
           }
-          for (const item of context.document.body.paragraphs.items) {
+          for (const item of paragraphs) {
             item.load();
           }
           await context.sync();
